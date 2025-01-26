@@ -11,7 +11,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 def chat():
     user_input = request.json.get('message')
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=[{"role": "user", "content": user_input}]
     )
     return jsonify({'response': response['choices'][0]['message']['content']})
