@@ -25,8 +25,10 @@ def chat():
             messages=[{"role": "user", "content": user_input}]
         )
         return jsonify({'response': response['choices'][0]['message']['content']})
+    except openai.error.OpenAIError as e:
+        return jsonify({'error': f'OpenAI API error: {str(e)}'}), 500
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
