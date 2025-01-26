@@ -21,7 +21,7 @@ def chat():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[{"role": "user", "content": user_input}]
         )
         return jsonify({'response': response['choices'][0]['message']['content']})
