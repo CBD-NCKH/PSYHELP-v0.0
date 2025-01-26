@@ -1,16 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import openai
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend", static_url_path="", template_folder="../frontend")
 
 # Đặt OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Route để hiển thị giao diện (frontend)
 @app.route('/')
-def home():
-    return "Welcome to the ChatCBD! Use the /chat endpoint to interact with the bot."
+def serve_index():
+    return send_from_directory(app.template_folder, "index.html")
 
+# API Chatbot
 @app.route('/chat', methods=['POST'])
 def chat():
     user_input = request.json.get('message')
