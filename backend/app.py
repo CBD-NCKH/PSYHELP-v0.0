@@ -35,30 +35,31 @@ def api():
 
         keywords = extract_keywords_multilingual(user_message)
         db_result = query_sqlite_with_keywords("DatasetTable", keywords)
-
         db_context = "\n".join([f"Row {i+1}: {row}" for i, row in enumerate(db_result)])
+
         context = (
             f"Dữ liệu từ cơ sở dữ liệu:\n{db_context}\n\n"
             f"Lịch sử hội thoại:\n{memory_context}\n\n"
             f"Câu hỏi của người dùng: {user_message}"
         )
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Bạn là một trợ lý ảo giúp tư vấn tâm lý cho người dùng"
-                    )
-                },
-                {"role": "user", "content": context}
-            ],
-            max_tokens=9999999999999999999999999999999999,
-            temperature=0.7
+        # Gọi API của OpenAI theo giao diện mới (asynchronous)
+        response = asyncio.run(
+            openai.ChatCompletion.acreate(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Bạn là một trợ lý ảo giúp tư vấn tâm lý cho người dùng"
+                    },
+                    {"role": "user", "content": context}
+                ],
+                max_tokens=1000,  # Sử dụng giá trị hợp lý cho max_tokens
+                temperature=0.7
+            )
         )
 
-        bot_reply = response.choices[0].message.content
+        bot_reply = response['choices'][0]['message']['content']
 
         save_to_google_sheet(sheet, username, "user", user_message)
         save_to_google_sheet(sheet, username, "assistant", bot_reply)
