@@ -12,20 +12,20 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 def serve_index():
     return send_from_directory(app.template_folder, "index.html")
 
-# API Chatbot
+# API Chatbot sử dụng async/await với cú pháp mới của OpenAI
 @app.route('/chat', methods=['POST'])
-def chat():
+async def chat():
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({'error': 'Message is required'}), 400
 
     try:
-        response = openai.ChatCompletion.create(
+        response = await openai.ChatCompletion.acreate(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": user_input}]
         )
         return jsonify({'response': response['choices'][0]['message']['content']})
-    except openai.error.OpenAIError as e:
+    except openai.exceptions.OpenAIError as e:
         return jsonify({'error': f'OpenAI API error: {str(e)}'}), 500
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
