@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import openai
 import os
+import asyncio
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="", template_folder="../frontend")
 
@@ -12,17 +13,20 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 def serve_index():
     return send_from_directory(app.template_folder, "index.html")
 
-# API Chatbot sử dụng async/await với cú pháp mới của OpenAI
+# API Chatbot với giao diện đồng bộ (sử dụng asyncio.run để đóng gói lời gọi bất đồng bộ)
 @app.route('/chat', methods=['POST'])
-async def chat():
+def chat():
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({'error': 'Message is required'}), 400
 
     try:
-        response = await openai.ChatCompletion.acreate(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": user_input}]
+        # Chạy hàm bất đồng bộ theo cách đồng bộ
+        response = asyncio.run(
+            openai.ChatCompletion.acreate(
+                model="gpt-4o",
+                messages=[{"role": "user", "content": user_input}]
+            )
         )
         return jsonify({'response': response['choices'][0]['message']['content']})
     except openai.exceptions.OpenAIError as e:
